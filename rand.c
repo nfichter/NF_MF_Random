@@ -20,31 +20,32 @@ int randNum(int *p) {
 }
 
 int main() {
-  int *p[10];
+  //Part 1: reading in random numbers - works
+  int *p = (int*)malloc(10*sizeof(int));
   int i;
   for (i = 0; i < 10; i++) {
-    p[i] = (int*)malloc(sizeof(int));
-    randNum(p[i]);
+    randNum(p+i);
   }
   for (i = 0; i < 10; i++) {
-    printf("Integer #%d: %d\n",i+1,*p[i]);
+    printf("Integer #%d: %d\n",i+1,*(p+i));
   }
 
+  //Part 2: writing them to a new file - maybe works?
   int fd = open("randnums",O_CREAT | O_WRONLY,0644);
   if (fd == -1) {
     printf("%d - %s",errno,strerror(errno));
     return 0;
   }
-  void *vp = p;
-  write(fd,vp,10*sizeof(int));
+  printf("%lu\n",sizeof(p));
+  write(fd,p,10*sizeof(int));
   close(fd);
-  
+
+  //Part 3: reading them back from the file - maybe works?
   fd = open("randnums",O_RDONLY);
   if (fd == -1) {
     printf("%d - %s",errno,strerror(errno));
     return 0;
   }
-  
   int *p2[10];
   read(fd,p2,sizeof(int));
   for (i = 0; i < 10; i++) {
