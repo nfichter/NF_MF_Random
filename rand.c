@@ -8,43 +8,48 @@
 #include <string.h>
 #include <errno.h>
 
-int main() {
+int randNum(int *p) {
   int fd = open("/dev/random",O_RDONLY);
   if (fd == -1) {
     printf("%d - %s",errno,strerror(errno));
     return 0;
   }
+  int ret = read(fd,p,sizeof(int));
+  close(fd);
+  return ret;
+}
+
+int main() {
   int *p[10];
   int i;
   for (i = 0; i < 10; i++) {
-    p[i] = (int*)malloc(10*sizeof(int));
-    read(fd,p[i],sizeof(int));
+    p[i] = (int*)malloc(sizeof(int));
+    randNum(p[i]);
   }
   for (i = 0; i < 10; i++) {
     printf("Integer #%d: %d\n",i+1,*p[i]);
   }
 
-  int fd2 = open("randnums",O_CREAT | O_WRONLY,0644);
-  if (fd2 == -1) {
+  int fd = open("randnums",O_CREAT | O_WRONLY,0644);
+  if (fd == -1) {
     printf("%d - %s",errno,strerror(errno));
     return 0;
   }
   void *vp = p;
-  int numwritten = write(fd2,vp,10*sizeof(int));
-
+  write(fd,vp,10*sizeof(int));
   close(fd);
-  close(fd2);
-  //added stuff vvv
-  fd2 = open("randnums",O_RDONLY);
-  if (fd2 == -1) {
+  
+  fd = open("randnums",O_RDONLY);
+  if (fd == -1) {
     printf("%d - %s",errno,strerror(errno));
     return 0;
   }
   
   int *p2[10];
+  read(fd,p2,sizeof(int));
   for (i = 0; i < 10; i++) {
-    p2[i] = (int*)malloc(10*sizeof(int));
-    read(fd2,p2[i],sizeof(int));
+    p2[i] = (int*)malloc(sizeof(int));
+    read(fd,p2[i],sizeof(int));
   }
   for (i = 0; i < 10; i++) {
     printf("Integer #%d (2nd round): %d\n",i+1,*p2[i]);
